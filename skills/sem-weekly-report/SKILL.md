@@ -29,6 +29,12 @@ Google広告運用案件の週次データを、Google Sheet「デイリーレ�
 ## 実行手順
 
 ### Step 0: config読込 & 対象期間の確定
+
+**Config絶対パス解決** (以下の順で試して最初に見つかったものを使う):
+1. 環境変数 `SEM_WEEKLY_REPO_ROOT` が設定されていれば `${SEM_WEEKLY_REPO_ROOT}/config/clients/<client_code>.yml`
+2. `~/projects/sintech-sem-weekly-report/config/clients/<client_code>.yml`（ローカル開発デフォルト）
+3. スキル自身のディレクトリから `../../../config/clients/<client_code>.yml`（プラグインインストール時）
+
 `config/clients/<client_code>.yml` を読み込み、以下を変数として保持:
 - `SHEET_ID`, `SEARCH_QUERY_TAB`, `AD_ASSET_TAB`
 - `NOTION_PARENT_ID`, `MTG_NOTES_PARENT_PAGE_ID`
