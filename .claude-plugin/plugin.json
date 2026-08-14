@@ -1,0 +1,10 @@
+{
+  "name": "sintech-sem-weekly-report",
+  "version": "0.1.0",
+  "description": "SINTECH SEM週次レポート自動化。Google Ads → Sheet → Excel生成 → Notion登録 → Slack速報のパイプラインをconfigベースで他案件展開可能に。",
+  "author": {
+    "name": "Akari Nakai",
+    "email": "nakai.akari@sintech-inc.com"
+  },
+  "keywords": ["sem", "google-ads", "weekly-report", "notion", "slack"]
+}

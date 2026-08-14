@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local outputs
+output/
+*.xlsx
+*.xlsx.b64
+/tmp/
+
+# Secrets & local configs
+config/clients/*.local.yml
+config/clients/*.private.yml
+.env
+.env.*
+!.env.example
+
+# Rclone / auth
+rclone.conf
+credentials.json
+service-account.json

@@ -1,0 +1,53 @@
+# SINTECH SEM週次レポート 案件別設定テンプレート
+# 新規案件を追加するときはこのファイルを config/clients/<client_code>.yml にコピーして値を埋める。
+# 必須項目は "REPLACE_WITH_" プレフィックスで示している。
+
+client:
+  name: "XXX"            # 表示名（Notion/Slackタイトルに使用）
+  code: "xxx"            # slug（英小文字/ハイフン、ローカルパスにも使用）
+
+data_source:
+  # Google Ads Script が書き込む Google Sheet
+  sheet_id: "REPLACE_WITH_SHEET_ID"
+  search_query_tab: "検索クエリ_raw"   # GAQL: search_term_view からの書き出し先タブ
+  ad_asset_tab: "広告アセット_raw"     # GAQL: ad_group_ad_asset_view からの書き出し先タブ
+
+notion:
+  # 案件親ページ配下に週次レポートを子ページとして作成
+  parent_page_id: "REPLACE_WITH_NOTION_PARENT_ID"
+  # 議事録参照（考察の起点、オプション）。指定するとその配下から直近議事録を検索して考察に反映
+  mtg_notes_parent_page_id: null
+
+slack:
+  # 週次速報の投稿先チャンネルとスレッド
+  channel_id: "REPLACE_WITH_CHANNEL_ID"       # 例: C0ADDVB7P4Y
+  thread_ts: "REPLACE_WITH_THREAD_TS"         # 親メッセージのts（スレッド返信固定用）
+  connector_uuid: "REPLACE_WITH_CONNECTOR_UUID"  # Slack MCP コネクタUUID
+
+drive:
+  # Excel成果物のアップロード先フォルダ
+  root_folder_id: null                              # 任意（親フォルダを持つなら）
+  search_query_folder_id: "REPLACE_WITH_SEARCH_QUERY_FOLDER_ID"
+  ad_asset_folder_id: "REPLACE_WITH_AD_ASSET_FOLDER_ID"
+  scripts_folder_id: null                           # スクリプト保管用（オプション）
+
+output:
+  # ローカル出力先ディレクトリ（skill実行時にxlsx生成される場所）
+  local_dir: "/home/{user}/projects/my-project/{client_code}/output"
+
+remote_trigger:
+  # 週次自動発火用RemoteTrigger（初回作成後にID記入）
+  trigger_id: null
+  cron_expression: "0 0 * * 1"   # 毎週月曜 9:00 JST (0:00 UTC)
+  model: "claude-sonnet-4-6"
+
+ads_script:
+  # Google広告UI側のAds Script実行スケジュール（記録用、実運用はUIで設定）
+  schedule_hint: "毎週月曜 7:00-7:30 JST"
+  timezone_fix_applied: true      # ads-script/daily_export.js.template のTZバグ修正版を使っているか
+
+review_gates:
+  # サブエージェントレビューの必須ゲート
+  critical_thinker: true    # 論理飛躍・数値整合性チェック
+  customer_advocate: true   # ターゲット観点でのクリエイティブ評価
+  legal_compliance: false   # 入稿変更を伴う場合のみtrue

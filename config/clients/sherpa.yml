@@ -1,0 +1,44 @@
+# SHERPA（不動産エージェント採用広告）参考設定
+# 本リポジトリの最初の運用実績案件。他案件展開の参考。
+
+client:
+  name: "SHERPA"
+  code: "sherpa"
+
+data_source:
+  sheet_id: "1smuExpx4bPAj8uALdMlnoWGsKrbm1F24ES5Y2iqh0NE"
+  search_query_tab: "検索クエリ_raw"
+  ad_asset_tab: "広告アセット_raw"
+
+notion:
+  parent_page_id: "30ca33d430f680d88758d68eb399ada6"
+  # 議事録DBは案件ページ配下（Circleback自動登録分含む）
+  mtg_notes_parent_page_id: "30ca33d430f680d88758d68eb399ada6"
+
+slack:
+  channel_id: "C0ADDVB7P4Y"          # #ad_sherpa
+  thread_ts: "1785484403.404289"     # 「【検索クエリ】週次速報通知」親メッセージ
+  connector_uuid: "8f3748f7-400d-4c0b-89b4-7b6d3d53d176"
+
+drive:
+  root_folder_id: "1rmjCxdZ_k5lFX2FVwOs7QWGJ4qKOYW3f"          # SHERPA_週次レポート
+  search_query_folder_id: "1Ix0to_rhLx4LJgnguMKJ-ZihvX8BWgld"
+  ad_asset_folder_id: "1BJaL0ZUGOvDr8TvMIhR-hgIw3ZnhsshG"
+  scripts_folder_id: "14ziu2E5qruOs6hFcdka4iaaDKLcEdLMj"
+
+output:
+  local_dir: "/home/nakai/projects/my-project/SHERPA/output"
+
+remote_trigger:
+  trigger_id: "trig_01RcYezhUP5JD8CRtx4WCYt5"
+  cron_expression: "0 0 * * 1"
+  model: "claude-sonnet-4-6"
+
+ads_script:
+  schedule_hint: "毎週月曜 7:22 JST"
+  timezone_fix_applied: true
+
+review_gates:
+  critical_thinker: true
+  customer_advocate: true
+  legal_compliance: false
