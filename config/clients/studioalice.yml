@@ -1,0 +1,55 @@
+## スタジオアリス（こども写真館領域） 参考設定
+## 配布リハーサル兼スタジオアリスへのSEM週次スキル展開（2026-08-18 起票）
+## 既存の月曜14時発火の週次レポート自動化とは別物・並行運用。
+## Google広告のみカバー（Yahoo広告は現状スコープ外）。
+
+client:
+  name: "スタジオアリス"
+  code: "studioalice"
+
+data_source:
+  ## 【SEM週次専用】スタジオアリス_SEM週次_raw（2026-08-18 新規作成、Drive「検索クエリ・広告アセット」配下）
+  ## 【New社内】スタジオアリス_こども写真館(1E5YT0jo8l...)は3.1MB超でMCP export失敗のため専用Sheetに分離。
+  sheet_id: "1dM3Hj63nJV5Ssqnalh1SDAic7gXeyXvt29Ilhp4e_bI"
+  search_query_tab: "検索クエリ_raw"
+  ad_asset_tab: "広告アセット_raw"
+
+notion:
+  ## スタジオアリス案件親ページ配下に子ページ作成
+  parent_page_id: "30ca33d430f6801cb3cfda83a7e4b794"
+  ## 議事録も同親配下に集約（Circleback自動登録分含む）
+  mtg_notes_parent_page_id: "30ca33d430f6801cb3cfda83a7e4b794"
+
+slack:
+  ## スタジオアリス専用チャネル、親メッセ ts=1787040238.624799（2026-08-18投稿）
+  channel_id: "C0ACKMP7EAW"
+  thread_ts: "1787040238.624799"
+  connector_uuid: "8f3748f7-400d-4c0b-89b4-7b6d3d53d176"  ## SHERPAと同一運用者アカウントのため流用
+
+drive:
+  ## スタジオアリス共有ドライブ「検索クエリ・広告アセット」配下（2026-08-18作成）
+  root_folder_id: "1ff9V_6l8SmDrCr3npA4Wjc57ee3IK1Bs"
+  search_query_folder_id: "10XhBSSO66SqHH7nydyFuloWRH7_CKejB"
+  ad_asset_folder_id: "1GYIm7aVGIreRtc3dHMzZ0emhJ8Hijfdg"
+  scripts_folder_id: null
+
+output:
+  local_dir: "/home/nakai/projects/my-project/スタジオアリス/output"
+
+remote_trigger:
+  ## Phase 3-2 で作成（2026-08-18）
+  trigger_id: "trig_01XJjZci52qrmxDVZsmX2uca"
+  cron_expression: "0 0 * * 1"     ## 毎週月曜 9:00 JST（既存14時発火より前）
+  model: "claude-sonnet-4-6"
+  ## 管理UI: https://claude.ai/code/scheduled/trig_01XJjZci52qrmxDVZsmX2uca
+  ## 次回発火: 2026-08-24（月）9:06 JST
+
+ads_script:
+  ## Phase 2 で Google広告 UI に daily_export.js.template を設置
+  schedule_hint: "毎週月曜 7:00 JST"
+  timezone_fix_applied: true
+
+review_gates:
+  critical_thinker: true
+  customer_advocate: true
+  legal_compliance: false
