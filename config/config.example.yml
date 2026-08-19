@@ -29,7 +29,7 @@ drive:
   root_folder_id: null                              # 任意（親フォルダを持つなら）
   search_query_folder_id: "REPLACE_WITH_SEARCH_QUERY_FOLDER_ID"
   ad_asset_folder_id: "REPLACE_WITH_AD_ASSET_FOLDER_ID"
-  scripts_folder_id: null                           # スクリプト保管用（オプション）
+  scripts_folder_id: "18yeDyQvWScOZqJyU2Ii7Kq3qjybyp8G-"  # 共通 Claude フォルダ（build_*.py 保管、全案件共通）。案件固有の scripts フォルダを使う場合のみ上書き
 
 output:
   # ローカル出力先ディレクトリ（skill実行時にxlsx生成される場所）
