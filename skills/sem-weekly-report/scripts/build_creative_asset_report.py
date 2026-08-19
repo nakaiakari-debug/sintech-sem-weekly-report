@@ -90,7 +90,8 @@ def filter_period(rows, start, end):
     return out
 
 
-def normalize(row):
+def normalize(row, fee=1.0):
+    # cost に fee係数を掛けて請求ベースに直す。CPA は cost から導出されるためここで掛ければ足りる。
     return {
         "date": row.get("segments.date", ""),
         "campaign": row.get("campaign.name", ""),
@@ -100,7 +101,7 @@ def normalize(row):
         "label": row.get("ad_group_ad_asset_view.performance_label", ""),
         "imp": parse_int(row.get("metrics.impressions")),
         "clicks": parse_int(row.get("metrics.clicks")),
-        "cost": parse_float(row.get("metrics.cost_micros")) / 1_000_000.0,
+        "cost": parse_float(row.get("metrics.cost_micros")) / 1_000_000.0 * fee,
         "cv": parse_float(row.get("metrics.conversions")),
     }
 
@@ -281,13 +282,18 @@ def main():
     ap.add_argument("--week-start", required=True)
     ap.add_argument("--week-end", required=True)
     ap.add_argument("--output", required=True)
+    ap.add_argument("--fee-coefficient", type=float, default=1.0,
+                    help="COSTに掛ける代理店fee係数（請求ベース化）。既定1.0=管理画面数値のまま")
     a = ap.parse_args()
 
+    fee = a.fee_coefficient
     raw_rows = load_csv(a.input)
     has_date = has_date_col(raw_rows)
     filtered = filter_period(raw_rows, a.week_start, a.week_end)
-    rows = [normalize(r) for r in filtered]
+    rows = [normalize(r, fee) for r in filtered]
     period_str = japanese_period(a.week_start, a.week_end)
+    if fee != 1.0:
+        period_str += f"　／　COST・CPAは請求ベース（fee係数 {fee:g}）"
 
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
@@ -300,7 +306,7 @@ def main():
     os.makedirs(os.path.dirname(a.output), exist_ok=True)
     wb.save(a.output)
     fix_xlsx_corruption(a.output)
-    print(f"OK: {a.output}  ({len(rows)}行 / has_date={has_date})")
+    print(f"OK: {a.output}  ({len(rows)}行 / has_date={has_date} / fee={fee:g})")
 
 
 if __name__ == "__main__":

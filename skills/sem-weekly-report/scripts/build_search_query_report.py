@@ -85,7 +85,9 @@ def filter_period(rows, start, end):
     return out
 
 
-def normalize(row):
+def normalize(row, fee=1.0):
+    # cost に fee係数を掛けて請求ベースに直す。CPC・CPA は cost から導出されるため
+    # ここで掛けておけば全シートに反映される。CTR・CVR は影響を受けない。
     return {
         "date": row.get("segments.date", ""),
         "campaign": row.get("campaign.name", ""),
@@ -94,7 +96,7 @@ def normalize(row):
         "match_type": row.get("segments.search_term_match_type", ""),
         "imp": parse_int(row.get("metrics.impressions")),
         "clicks": parse_int(row.get("metrics.clicks")),
-        "cost": parse_float(row.get("metrics.cost_micros")) / 1_000_000.0,
+        "cost": parse_float(row.get("metrics.cost_micros")) / 1_000_000.0 * fee,
         "cv": parse_float(row.get("metrics.conversions")),
     }
 
@@ -388,14 +390,19 @@ def main():
     ap.add_argument("--prev-start", required=True)
     ap.add_argument("--prev-end", required=True)
     ap.add_argument("--output", required=True)
+    ap.add_argument("--fee-coefficient", type=float, default=1.0,
+                    help="COSTに掛ける代理店fee係数（請求ベース化）。既定1.0=管理画面数値のまま")
     a = ap.parse_args()
 
+    fee = a.fee_coefficient
     rows_all = load_csv(a.input)
-    cur_rows = [normalize(r) for r in filter_period(rows_all, a.week_start, a.week_end)]
-    pre_rows = [normalize(r) for r in filter_period(rows_all, a.prev_start, a.prev_end)]
+    cur_rows = [normalize(r, fee) for r in filter_period(rows_all, a.week_start, a.week_end)]
+    pre_rows = [normalize(r, fee) for r in filter_period(rows_all, a.prev_start, a.prev_end)]
 
     period_str = japanese_period(a.week_start, a.week_end)
     prev_period_str = japanese_period(a.prev_start, a.prev_end)
+    if fee != 1.0:
+        period_str += f"　／　COST・CPC・CPAは請求ベース（fee係数 {fee:g}）"
 
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
@@ -410,7 +417,7 @@ def main():
     os.makedirs(os.path.dirname(a.output), exist_ok=True)
     wb.save(a.output)
     fix_xlsx_corruption(a.output)
-    print(f"OK: {a.output}  (当週 {len(cur_rows)}行 / 前週 {len(pre_rows)}行)")
+    print(f"OK: {a.output}  (当週 {len(cur_rows)}行 / 前週 {len(pre_rows)}行 / fee={fee:g})")
 
 
 if __name__ == "__main__":
