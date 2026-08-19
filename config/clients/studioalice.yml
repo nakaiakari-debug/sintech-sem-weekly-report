@@ -31,7 +31,7 @@ drive:
   root_folder_id: "1ff9V_6l8SmDrCr3npA4Wjc57ee3IK1Bs"
   search_query_folder_id: "10XhBSSO66SqHH7nydyFuloWRH7_CKejB"
   ad_asset_folder_id: "1GYIm7aVGIreRtc3dHMzZ0emhJ8Hijfdg"
-  scripts_folder_id: null
+  scripts_folder_id: "18yeDyQvWScOZqJyU2Ii7Kq3qjybyp8G-"  # 共通scripts（build_*.py保管）。2026-08-19 SHERPA/scripts から共通フォルダへ移設
 
 output:
   local_dir: "/home/nakai/projects/my-project/スタジオアリス/output"

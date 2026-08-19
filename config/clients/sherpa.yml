@@ -24,7 +24,7 @@ drive:
   root_folder_id: "1rmjCxdZ_k5lFX2FVwOs7QWGJ4qKOYW3f"          # SHERPA_週次レポート
   search_query_folder_id: "1Ix0to_rhLx4LJgnguMKJ-ZihvX8BWgld"
   ad_asset_folder_id: "1BJaL0ZUGOvDr8TvMIhR-hgIw3ZnhsshG"
-  scripts_folder_id: "14ziu2E5qruOs6hFcdka4iaaDKLcEdLMj"
+  scripts_folder_id: "18yeDyQvWScOZqJyU2Ii7Kq3qjybyp8G-"  # 共通scripts（build_*.py保管）。旧: 14ziu2E5…（SHERPA_週次レポート/scripts）から2026-08-19移設
 
 output:
   local_dir: "/home/nakai/projects/my-project/SHERPA/output"
