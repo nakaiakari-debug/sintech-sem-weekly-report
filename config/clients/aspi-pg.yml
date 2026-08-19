@@ -1,0 +1,65 @@
+## ASPI（ジム入会者 / partnergym）SEM週次レポート設定
+## 展開日: 2026-08-19 ／ 展開者: 竹谷健志（takeya.kenji@sintech-inc.com）
+## Google広告のみカバー（Yahoo広告は現状スコープ外）。
+## 同じASPIでも「トレーナースクール(TS)」は別アカウント・別案件のため本configの対象外。
+
+client:
+  name: "ASPI（ジム入会者）"
+  code: "aspi-pg"
+
+data_source:
+  ## 【SEM週次専用】【ASPI】SEM週次_raw（2026-08-19 新規作成）
+  ## 既存の【社内】【ASPI】デイリーレポート(1Kj3L7Ut...)は6.27MBで3MB超のため、
+  ## L2（大規模SheetのMCP export失敗）を踏まえてBパターン＝専用Sheet分離を選択。
+  ## 格納先: 共有ドライブ > パーソナルジム入会者 > SEM週次レポート
+  sheet_id: "1Y9XgQFG9zXfySGhNbYVQl2PwSEcPwQUg6vWFpATJSPA"
+  search_query_tab: "検索クエリ_raw"
+  ad_asset_tab: "広告アセット_raw"
+
+notion:
+  ## ASPI（ジム入会者）案件親ページ配下に週次子ページを作成
+  parent_page_id: "307a33d430f680df9c6fed698f131b94"
+  ## 議事録も同親配下（定例会アジェンダDB・Circleback自動登録分含む）
+  mtg_notes_parent_page_id: "307a33d430f680df9c6fed698f131b94"
+
+slack:
+  ## #ad_aspi_ジム入会者（社内チャネル）
+  channel_id: "C0ACHK28MQE"
+  ## 親メッセージ（2026-08-19 投稿）: https://sintech-corp.slack.com/archives/C0ACHK28MQE/p1787125180436369
+  thread_ts: "1787125180.436369"
+  ## Slack MCPコネクタUUID（ワークスペース接続単位。SINTECH Slackへの接続に対して発行され、
+  ## 運用者アカウントを問わず同一値。SHERPA・スタジオアリス等の他案件でも同値）
+  connector_uuid: "8f3748f7-400d-4c0b-89b4-7b6d3d53d176"
+
+drive:
+  ## 共有ドライブ > パーソナルジム入会者 > SEM週次レポート 配下（2026-08-19 作成）
+  root_folder_id: "19E-ECUP0MW-082HALIIGMMkYivtMuJdL"
+  search_query_folder_id: "1dYoQJ_QNLqU0HKds1-L6Apd01GKTn68p"
+  ad_asset_folder_id: "1bsPx8-E1tntyVhu_lOFsFnXzv_IFjlHo"
+  scripts_folder_id: "18yeDyQvWScOZqJyU2Ii7Kq3qjybyp8G-"  ## 共通 Claude フォルダ（build_*.py 保管、全案件共通）
+
+output:
+  ## ローカル実行時のxlsx出力先（macOS）
+  local_dir: "/Users/takeya/projects/sintech-sem-weekly-report/output/aspi-pg"
+
+remote_trigger:
+  ## Phase 3-2 で作成（2026-08-19）
+  trigger_id: "trig_019YdREHjLVgBsgPYJSE8Kcm"
+  cron_expression: "0 0 * * 1"     ## 毎週月曜 9:00 JST (0:00 UTC)
+  model: "claude-sonnet-4-6"
+  ## 管理UI: https://claude.ai/code/scheduled/trig_019YdREHjLVgBsgPYJSE8Kcm
+  ## 次回発火: 2026-08-24（月）9:06 JST
+  ## 環境ID: env_014vVW23VJa7CjrkHnAxLZJE（竹谷アカウント。運用者ごとに独立発行・L6）
+
+ads_script:
+  ## Google広告アカウント: ASPI partnergym 9338940180
+  google_ads_account_id: "9338940180"
+  schedule_hint: "毎週月曜 7:00 JST"
+  timezone_fix_applied: true
+
+review_gates:
+  critical_thinker: true
+  ## customer-advocate-aspi-pg は未配置（Phase 3-3で追加検討）。
+  ## 未配置の場合はSKILL.md Step 5の規定どおり1行警告してスキップされる。
+  customer_advocate: true
+  legal_compliance: false

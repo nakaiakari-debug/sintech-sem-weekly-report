@@ -154,6 +154,95 @@ Studio Alice トリガーは SHERPA 案件と同じ `build_search_query_report.p
 
 ---
 
+## L9. 広告アセットレポートの合計値は構造的に膨張する（最重要・カイショー PR#1/#2 と同根）
+
+### 症状
+`build_creative_asset_report.py` の「field_type別 実績サマリ」の COST / CV / IMP 合計が、アカウントの実績を大きく上回る。
+
+### ASPI（ジム入会者）での実測（2026-08-10〜16）
+| 集計元 | COST | CV | IMP |
+|---|---|---|---|
+| アカウント全体（`customer`） | ¥1,295,946 | 68.98 | 103,098 |
+| 検索クエリ（`search_term_view`） | ¥891,124 | 46.15 | 83,225 |
+| 広告アセット（`ad_group_ad_asset_view`） | ¥5,554,452 | 310.25 | 367,380 |
+
+アカウント実績に対し **4.29倍**。カイショーで「11倍膨張」と報告された事象と同じ性質で、倍率は RSA に登録されたアセット本数に比例して案件ごとに変わる。
+
+### 原因（スクリプトのバグではない）
+`ad_group_ad_asset_view` は「1インプレッション」を、その広告に紐づくアセット本数分の行に重複計上する GAQL 仕様。Google Ads API を直接叩いても同じ値が返るため、集計スクリプト側で合計している限り必ず膨張する。ASPI の当週はユニークアセット228本に対し行数9,778だった。
+
+### 対策
+- **絶対値としての合計を出さない。** アセット**間の相対比較**（どの訴求が相対的に効いているか）にのみ使う
+- Notion 登録時は赤 callout で「本表の合計は重複計上のため実績値ではない」と必ず明示する
+- スクリプト側の恒久対応は、サマリから COST/CV/IMP の合計行を落とすか、`※重複計上` を列見出しに埋め込む方向が望ましい
+
+### 展開時のアクション
+新規案件では Phase 3-1 の段階で、Google Ads API か管理画面のアカウント実績と突き合わせて膨張倍率を必ず実測する。倍率を config か案件メモに記録しておくと、以降の読み違いを防げる。
+
+---
+
+## L10. ローカル実行なら Drive API 直アップで L1 を回避できる
+
+### 症状
+L1 の通り Drive MCP `create_file` は base64 実効上限があり、1MB 未満でも詰まる実績がある。
+
+### 発見
+ローカル手動実行（Phase 3-1 / リカバリ）に限っては、MCP を経由せず **Drive API の resumable upload** を使えば制限を受けない。ASPI では 1,826,617 bytes（検索クエリ）と 1,026,831 bytes（広告アセット）の2本とも一発で成功した。
+
+```python
+from googleapiclient.http import MediaFileUpload
+media = MediaFileUpload(path, mimetype=XLSX_MIME, resumable=True)
+drive.files().create(body={"name": name, "parents": [folder_id]},
+                     media_body=media, supportsAllDrives=True).execute()
+```
+
+### 限界
+RemoteTrigger（Anthropic クラウド実行）からは MCP しか使えないため、**自動発火時の L1 は解消しない**。トリガー側は従来どおり try-except でスキップし、手動アップ運用を継続する。
+
+### 展開時のアクション
+「自動発火は Drive スキップ、リカバリ／初回検証はローカルから API 直アップ」を運用の既定にする。
+
+---
+
+## L11. `performance_label` が全件 NOT_APPLICABLE になる案件がある
+
+### 症状
+広告アセットレポートの「HEADLINE/DESCRIPTION パフォーマンス別」シートが、BEST/GOOD/LOW の分類を1件も持たない。
+
+### ASPI での実測
+NOT_APPLICABLE 6,850行 / PENDING 17行、BEST・GOOD・LOW はゼロ。
+
+### 原因（推定）
+ASPI は店舗ごとにキャンペーンと広告グループを細分化しており（当週42AG）、AG 単位の配信ボリュームが Google のアセット評価閾値に届いていないためとみられる。店舗別・エリア別に細かく割る構成の案件では同じ状態になりうる。
+
+### 対策
+`notion-templates/creative_asset_layout.md` に既定されている赤 callout（全 NOT_APPLICABLE 時）をそのまま使う。ただし同テンプレは代替として「CV/CPA視点で評価」と書いているが、その CV/CPA が L9 で膨張しているため、**相対比較である旨を併記しないと誤読を招く**。テンプレの追補が必要。
+
+### 展開時のアクション
+Phase 3-1 でラベル分布を確認し、全滅している案件は「ラベルベースの入替判断は不可」を所感の固定文言に入れる。
+
+---
+
+## L12. macOS 運用者はシステム python3 が要件未達（3.9 系）
+
+### 症状
+macOS 標準の `/usr/bin/python3` は 3.9.6 で、Phase 0-5 の「3.10 以上」を満たさない。`python3 -m pip install openpyxl` も externally-managed で弾かれうる。
+
+### 対策（採用済み）
+リポジトリ直下に専用 venv を作り、ローカル実行はそちらを使う（`.gitignore` に `.venv/` があるため汚さない）。
+
+```bash
+/opt/homebrew/bin/python3.12 -m venv .venv
+./.venv/bin/python -m pip install openpyxl PyYAML
+```
+
+SKILL.md / トリガープロンプト内の `python3` は、ローカル実行時に `./.venv/bin/python` と読み替える。RemoteTrigger 側（Linux）は影響を受けない。
+
+### 展開時のアクション
+⑫ Windows 付録と並べて **macOS 付録** を設計書に追加する。あわせて、GitHub リポジトリは 2026-08-19 時点で public 設定になっており、Phase 0-1 の「中井さんへ招待依頼」は不要だった（設計書は private 前提の記述のまま）。
+
+---
+
 ## サマリ：他運用者への配布時のチェックリスト（追加）
 
 以下を README.md 「新規案件展開手順」に追記:
@@ -164,6 +253,10 @@ Studio Alice トリガーは SHERPA 案件と同じ `build_search_query_report.p
 - [ ] **config `scripts_folder_id`**: SHERPA共有 or 個別コピー方針（L7）
 - [ ] **トリガー作成**: `/schedule` スキル使用（L6）
 - [ ] **Drive fallback**: try-except でSkip仕様（L1）
+- [ ] **アセット膨張倍率の実測**: アカウント実績と突合し、合計値を絶対値として使わない（L9）
+- [ ] **Drive 直アップ**: ローカル実行／リカバリは Drive API の resumable upload を使う（L10）
+- [ ] **ラベル分布確認**: `performance_label` 全滅案件は入替判断を保留と明記（L11）
+- [ ] **実行環境**: macOS は専用 venv（Python 3.10+）を用意（L12）
 
 ---
 
@@ -176,3 +269,14 @@ Studio Alice トリガーは SHERPA 案件と同じ `build_search_query_report.p
   - `docs/setup_studioalice.md`
   - `remote-trigger/trigger_prompt_studioalice.md`
 - 次回更新: 2026-08-24 スタジオアリス初回自動発火の結果を追記
+
+### L9〜L12（ASPI（ジム入会者）展開）
+
+- 発見者: 竹谷健志（takeya.kenji@sintech-inc.com）
+- 発見日: 2026-08-19
+- 関連ファイル:
+  - `config/clients/aspi-pg.yml`
+  - `remote-trigger/trigger_prompt_aspi-pg.md`
+  - `ads-script/daily_export_aspi-pg.js`
+- 検証環境: macOS（Darwin 25.5.0）／Python 3.12（専用 venv）
+- 突合方法: Google Ads API v25 でアカウント `9338940180` の同期間実績を直接取得し、生成 xlsx と照合
