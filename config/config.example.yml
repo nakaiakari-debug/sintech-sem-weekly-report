@@ -5,6 +5,10 @@
 client:
   name: "XXX"            # 表示名（Notion/Slackタイトルに使用）
   code: "xxx"            # slug（英小文字/ハイフン、ローカルパスにも使用）
+  # COSTに掛ける代理店fee係数。1.0=管理画面数値のまま、1.2=請求ベース（マージン20%込み）。
+  # 案件の請求条件に合わせて設定する。値は案件マスタの「fee係数」を実データで検算してから入れること。
+  # build_*.py の --fee-coefficient に渡され、COST・CPC・CPA に反映される（CTR・CVR は不変）。
+  fee_coefficient: 1.0
 
 data_source:
   # Google Ads Script が書き込む Google Sheet
