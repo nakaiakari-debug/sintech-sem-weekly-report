@@ -1,7 +1,7 @@
 {
-  "name": "sintech-sem-weekly-report",
-  "version": "0.1.0",
-  "description": "SINTECH SEM週次レポート自動化。Google Ads → Sheet → Excel生成 → Notion登録 → Slack速報のパイプラインをconfigベースで他案件展開可能に。",
+  "name": "sem-weekly-report",
+  "version": "0.2.1",
+  "description": "SINTECH SEM週次レポート自動化。Google Ads → Sheet → Excel生成 → Notion登録 → Slack速報のパイプラインをconfigベースで他案件展開可能に。critical-thinker と案件別 customer-advocate（SHERPA・スタジオアリス）サブエージェントを同梱。",
   "author": {
     "name": "Akari Nakai",
     "email": "nakai.akari@sintech-inc.com"

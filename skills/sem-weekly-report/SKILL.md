@@ -94,8 +94,11 @@ python3 scripts/build_creative_asset_report.py \
 ### Step 5: レビュー（必須ゲート）
 config の `review_gates` に従い順次実行:
 
-1. **critical-thinker**: 数値の論理飛躍・前提の妥当性・所感と推奨アクションの整合性チェック
-2. **customer-advocate**: 広告アセット部分の当週傾向がターゲットに刺さるか、上から目線/不安煽り/誇大表現がないか
+1. **critical-thinker**: 数値の論理飛躍・前提の妥当性・所感と推奨アクションの整合性チェック（案件非依存の共通エージェント）
+2. **customer-advocate-<client_code>**: 案件別 customer-advocate を config の `client.code` から動的解決して起動:
+   - 例: `client.code=sherpa` → `customer-advocate-sherpa`（不動産エージェント向け訴求のレビュー）
+   - 例: `client.code=studioalice` → `customer-advocate-studioalice`（保護者向け訴求のレビュー）
+   - 該当agentが未配置の案件は「案件別 customer-advocate 未配置」を1行警告してスキップ（critical-thinker のみで進行）。新規案件展開時は `agents/customer-advocate-<client_code>.md` を追加してPR
 3. （`legal_compliance: true` の案件のみ）**legal-compliance-checker**: NG表現・業法・景表法チェック
 
 指摘があれば所感/推奨を修正してからStep 6へ。

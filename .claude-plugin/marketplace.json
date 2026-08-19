@@ -1,0 +1,23 @@
+{
+  "name": "sintech-tools",
+  "description": "SINTECH社内配布用プラグインカタログ。運用型広告レポート自動化スキル・サブエージェント群を提供。",
+  "owner": {
+    "name": "Akari Nakai",
+    "email": "nakai.akari@sintech-inc.com"
+  },
+  "plugins": [
+    {
+      "name": "sem-weekly-report",
+      "source": "./",
+      "displayName": "SEM週次レポート自動化",
+      "description": "Google Ads → Sheet → Excel生成 → Notion登録 → Slack速報のパイプラインを config ベースで他案件展開可能に。critical-thinker と案件別 customer-advocate（SHERPA・スタジオアリス）サブエージェントを同梱。",
+      "version": "0.2.1",
+      "author": {
+        "name": "Akari Nakai",
+        "email": "nakai.akari@sintech-inc.com"
+      },
+      "category": "reporting",
+      "tags": ["sem", "google-ads", "weekly-report", "notion", "slack", "sintech"]
+    }
+  ]
+}
