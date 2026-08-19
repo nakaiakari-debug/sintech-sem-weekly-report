@@ -90,6 +90,13 @@ def filter_period(rows, start, end):
     return out
 
 
+DUP_NOTE = ("※ ad_group_ad_asset_view は1インプレッションを、その広告で配信された見出し・説明文それぞれに"
+            "重複計上する。以下の IMP・CT・COST・CV は延べ値であり、実績の合計ではない"
+            "（実測で約11倍）。CTR・CVR・CPA は分子分母が同率で膨らむため比率としては使える。")
+
+SOURCE_OF_TRUTH_NOTE = "実績（正）: 検索クエリ側参照"
+
+
 def normalize(row):
     return {
         "date": row.get("segments.date", ""),
@@ -134,6 +141,8 @@ def sheet_summary(wb, rows, period_str, has_date):
     if not has_date:
         ws.cell(2, 4, "※ segments.date未追加のためスナップショット扱い（前週比N/A）").font = Font(name="Meiryo UI", size=10, color="C00000")
 
+    ws.cell(3, 1, SOURCE_OF_TRUTH_NOTE).font = Font(name="Meiryo UI", size=10, bold=True, color="C00000")
+
     ws.cell(4, 1, "field_type × performance_label 分布（件数）").font = TITLE_FONT
     labels = sorted({r["label"] or "(空)" for r in rows},
                     key=lambda x: LABEL_ORDER.index(x) if x in LABEL_ORDER else 99)
@@ -158,8 +167,10 @@ def sheet_summary(wb, rows, period_str, has_date):
         c.number_format = "#,##0"
 
     start_row = 6 + len(fts) + 2
-    ws.cell(start_row, 1, "field_type別 実績サマリ").font = TITLE_FONT
-    write_header(ws, ["field_type", "アセット数", "IMP", "CT", "CTR", "COST", "CV", "CVR", "CPA"], row_idx=start_row + 1)
+    ws.cell(start_row, 1, "field_type別 実績サマリ（延べ値）").font = TITLE_FONT
+    ws.cell(start_row + 1, 1, DUP_NOTE).font = Font(name="Meiryo UI", size=9, color="C00000")
+    start_row += 1
+    write_header(ws, ["field_type", "アセット数", "延べIMP", "延べCT", "CTR", "延べCOST", "延べCV", "CVR", "CPA"], row_idx=start_row + 1)
     for i, ft in enumerate(fts, start=start_row + 2):
         subset = [r for r in rows if (r["field_type"] or "(空)") == ft]
         cnt = len(subset)
@@ -218,8 +229,9 @@ def sheet_field_type(wb, rows, field_type, period_str):
 
 def sheet_ad_group(wb, rows, period_str):
     ws = wb.create_sheet("広告グループ別")
-    write_title_and_period(ws, "広告グループ別集計（SINTECH作成）", period_str)
-    write_header(ws, ["広告グループ", "アセット数", "IMP", "CT", "CTR", "COST", "CV", "CVR", "CPA"], row_idx=3)
+    write_title_and_period(ws, "広告グループ別集計（延べ値・SINTECH作成）", period_str)
+    ws.cell(3, 1, DUP_NOTE + SOURCE_OF_TRUTH_NOTE).font = Font(name="Meiryo UI", size=9, color="C00000")
+    write_header(ws, ["広告グループ", "アセット数", "延べIMP", "延べCT", "CTR", "延べCOST", "延べCV", "CVR", "CPA"], row_idx=4)
     bucket = defaultdict(lambda: {"cnt": 0, "imp": 0, "clicks": 0, "cost": 0.0, "cv": 0.0})
     for r in rows:
         b = bucket[r["ad_group"] or "(未設定)"]
@@ -229,7 +241,7 @@ def sheet_ad_group(wb, rows, period_str):
         b["cost"] += r["cost"]
         b["cv"] += r["cv"]
     ranked = sorted(bucket.items(), key=lambda kv: kv[1]["cost"], reverse=True)
-    for i, (ag, v) in enumerate(ranked, start=4):
+    for i, (ag, v) in enumerate(ranked, start=5):
         ctr = v["clicks"] / v["imp"] if v["imp"] else 0
         cvr = v["cv"] / v["clicks"] if v["clicks"] else 0
         cpa = v["cost"] / v["cv"] if v["cv"] else 0
